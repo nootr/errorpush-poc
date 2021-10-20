@@ -1,0 +1,46 @@
+version: "3"
+services:
+  metabase:
+    image: metabase/metabase
+    container_name: metabase
+    hostname: metabase
+    environment:
+      - MB_DB_TYPE=postgres
+      - MB_DB_DBNAME=postgres
+      - MB_DB_PORT=5432
+      - MB_DB_USER=postgres
+      - MB_DB_PASS=verysecretpassword
+      - MB_DB_HOST=postgres
+    ports:
+      - "3000:3000"
+    depends_on:
+      - errorpush
+  app:
+    image: app
+    build:
+      context: app
+    container_name: app
+    hostname: app
+    ports:
+      - "80:80"
+    depends_on:
+      - errorpush
+  errorpush:
+    image: hauxir/errorpush:latest
+    container_name: errorpush
+    hostname: errorpush
+    ports:
+      - "5000:5000"
+    environment:
+      - ACCESS_TOKEN=foobarbaz
+      - POSTGRES_URI=postgres://postgres:verysecretpassword@postgres/postgres
+    depends_on:
+      - postgres
+  postgres:
+    container_name: postgres
+    hostname: postgres
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=verysecretpassword
