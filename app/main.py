@@ -6,28 +6,29 @@ This proof-of-concept uses the rollbar library to send messages to an errorpush
 instance.
 """
 
+import os
 import logging
 import rollbar
 
 from flask import Flask
 
 
-class LogHandler(logging.Handler):
-    def emit(self, record):
-        rollbar.report_message(record.msg, level=record.levelname.lower())
-
-logger = logging.getLogger(__name__)
-logger.addHandler(LogHandler())
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+ROLLBAR_ENDPOINT = os.environ.get("ROLLBAR_ENDPOINT")
 
 
 app = Flask(__name__)
 
+rollbar.init(ACCESS_TOKEN, "app", endpoint=ROLLBAR_ENDPOINT)
 
-@app.before_first_request
-def init_rollbar():
-    access_token = "foobarbaz"
-    environment = "app"
-    rollbar.init(access_token, environment, endpoint="http://errorpush:5000/")
+
+class LogHandler(logging.Handler):
+    def emit(self, record):
+        rollbar.report_message(record.msg, level=record.levelname.lower())
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(LogHandler())
 
 
 @app.route('/')

@@ -21,6 +21,9 @@ services:
       context: app
     container_name: app
     hostname: app
+    environment:
+      - ACCESS_TOKEN=foobarbaz
+      - ROLLBAR_ENDPOINT=http://errorpush:5000/
     ports:
       - "80:80"
     depends_on:
